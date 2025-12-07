@@ -1,0 +1,424 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Responsive Image Carousel</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #f5f5f5;
+            padding: 0;
+            margin: 0;
+        }
+
+        .container {
+            max-width:100%;
+            margin: 0 auto;
+        }
+
+        .carousel-wrapper {
+            position: relative;
+            width: 100%;
+            max-width: 100%;
+            background-color: #fff;
+            border-radius: 0;
+            box-shadow: none;
+            overflow: hidden;
+        }
+
+        .carousel-container {
+            position: relative;
+            width: 100%;
+            height: 800px;
+            overflow: hidden;
+            /* Allow the browser to handle vertical scrolling by default
+               while we handle horizontal swipes ourselves */
+            touch-action: pan-y;
+            cursor: grab;
+        }
+
+        .carousel-inner {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            display: flex;
+        }
+
+        .carousel-item {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            opacity: 0;
+            transition: opacity 0.8s ease-in-out;
+        }
+
+        .carousel-item.active {
+            opacity: 1;
+        }
+
+        .carousel-item img {
+            width: 100%;
+            height: auto;
+            object-fit: contain;
+            object-position: center;
+            display: block;
+        }
+
+        /* Navigation Buttons */
+        .carousel-button {
+            position: absolute;
+            top: 50%;
+            transform: translateY(-50%);
+            background-color: rgba(255, 255, 255, 0.7);
+            color: #333;
+            border: none;
+            font-size: 24px;
+            padding: 12px 16px;
+            cursor: pointer;
+            z-index: 10;
+            transition: background-color 0.3s ease;
+            border-radius: 4px;
+        }
+
+        .carousel-button:hover {
+            background-color: rgba(255, 255, 255, 0.9);
+        }
+
+        .carousel-button.prev {
+            left: 15px;
+        }
+
+        .carousel-button.next {
+            right: 15px;
+        }
+
+        /* Pagination Dots */
+        .carousel-indicators {
+            position: absolute;
+            bottom: 30px;
+            left: 50%;
+            transform: translateX(-50%);
+            display: flex;
+            gap: 8px;
+            z-index: 10;
+        }
+
+        .dot {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            background-color: rgba(0, 0, 0, 0.5);
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+            border: 2px solid transparent;
+        }
+
+        .dot.active {
+            background-color: rgba(0, 0, 0, 0.9);
+            border-color: rgba(0, 0, 0, 0.9);
+        }
+
+        /* Slide Counter */
+        .slide-counter {
+            position: absolute;
+            top: 15px;
+            right: 15px;
+            background-color: rgba(0, 0, 0, 0.6);
+            color: white;
+            padding: 8px 12px;
+            border-radius: 4px;
+            font-size: 14px;
+            z-index: 10;
+        }
+
+        /* Responsive Design */
+        /* Tablet (600px - 1024px) */
+        @media (max-width: 1024px) {
+            .carousel-button {
+                font-size: 20px;
+                padding: 10px 14px;
+            }
+
+            .carousel-container {
+                padding-bottom: 66%; /* Adjust aspect ratio for tablet */
+            }
+        }
+
+        /* Mobile (below 600px) */
+        @media (max-width: 600px) {
+            body {
+                padding: 10px;
+            }
+
+            .carousel-button {
+                font-size: 18px;
+                padding: 8px 12px;
+                background-color: rgba(0, 0, 0, 0.5);
+                color: white;
+            }
+
+            .carousel-button:hover {
+                background-color: rgba(0, 0, 0, 0.7);
+            }
+
+            .carousel-button.prev {
+                left: 10px;
+            }
+
+            .carousel-button.next {
+                right: 10px;
+            }
+
+            .carousel-indicators {
+                bottom: 10px;
+                gap: 6px;
+            }
+
+            .dot {
+                width: 10px;
+                height: 10px;
+            }
+
+            .slide-counter {
+                top: 10px;
+                right: 10px;
+                font-size: 12px;
+                padding: 6px 10px;
+            }
+
+            .carousel-container {
+                padding-bottom: 100%; /* Full square for mobile */
+            }
+        }
+
+        /* Desktop (1025px and above) */
+        @media (min-width: 1025px) {
+            .carousel-container {
+                padding-bottom: 56%; /* 16:9 aspect ratio for desktop */
+            }
+        }
+
+        /* Auto-play indicator */
+        .autoplay-status {
+            position: absolute;
+            bottom: 15px;
+            left: 15px;
+            background-color: rgba(0, 0, 0, 0.6);
+            color: white;
+            padding: 6px 10px;
+            border-radius: 4px;
+            font-size: 12px;
+            z-index: 10;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Responsive Image Carousel</h1>
+        <br>
+        
+        <div class="carousel-wrapper">
+            <div class="carousel-container">
+                <div class="carousel-inner" id="carouselInner">
+                    <!-- Images will be inserted here by JavaScript -->
+                </div>
+                
+                <!-- Navigation Buttons -->
+                <!-- <button class="carousel-button prev" id="prevBtn">&lt;</button>
+                <button class="carousel-button next" id="nextBtn">&gt;</button> -->
+                
+                <!-- Slide Counter -->
+                <!-- <div class="slide-counter">
+                    <span id="currentSlide">1</span> / <span id="totalSlides">4</span>
+                </div> -->
+
+                <!-- Autoplay Status -->
+                <!-- <div class="autoplay-status" id="autoplayStatus">Auto-play: ON</div> -->
+                
+                <!-- Pagination Dots -->
+                <div class="carousel-indicators" id="indicators"></div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        class ImageCarousel {
+            constructor(imageArray) {
+                this.images = imageArray;
+                this.currentIndex = 0;
+                this.swipeThreshold = 25; // px - lower for faster response
+                this.init();
+                this.setupEventListeners();
+                // Position indicators relative to the visible image
+                this.positionIndicators();
+                window.addEventListener('resize', () => this.positionIndicators());
+            }
+
+            init() {
+                // Render carousel items
+                const carouselInner = document.getElementById('carouselInner');
+                this.images.forEach((image, index) => {
+                    const item = document.createElement('div');
+                    item.className = `carousel-item ${index === 0 ? 'active' : ''}`;
+                    item.innerHTML = `<img src="${image}" alt="Slide ${index + 1}">`;
+                    carouselInner.appendChild(item);
+                });
+
+                // Create dots
+                const indicators = document.getElementById('indicators');
+                this.images.forEach((_, index) => {
+                    const dot = document.createElement('div');
+                    dot.className = `dot ${index === 0 ? 'active' : ''}`;
+                    dot.addEventListener('click', () => this.goToSlide(index));
+                    indicators.appendChild(dot);
+                });
+                
+                // Re-position indicators after each image loads (images may be different heights)
+                const imgs = carouselInner.querySelectorAll('img');
+                imgs.forEach(img => {
+                    if (img.complete) {
+                        // already loaded
+                        this.positionIndicators();
+                    } else {
+                        img.addEventListener('load', () => this.positionIndicators());
+                    }
+                });
+            }
+
+            setupEventListeners() {
+                const carouselContainer = document.querySelector('.carousel-container');
+                let isPointerDown = false;
+                let startX = 0;
+                let currentX = 0;
+                let activePointerId = null;
+
+                // Use Pointer Events for unified, low-latency handling
+                carouselContainer.addEventListener('pointerdown', (e) => {
+                    // Only respond to primary button
+                    if (e.isPrimary === false) return;
+                    isPointerDown = true;
+                    activePointerId = e.pointerId;
+                    startX = e.clientX;
+                    currentX = startX;
+                    try { e.target.setPointerCapture(activePointerId); } catch (err) {}
+                    carouselContainer.style.cursor = 'grabbing';
+                });
+
+                carouselContainer.addEventListener('pointermove', (e) => {
+                    if (!isPointerDown || e.pointerId !== activePointerId) return;
+                    // Only store position (minimal work) — avoid layout reads here
+                    currentX = e.clientX;
+                });
+
+                const endPointer = (e) => {
+                    if (!isPointerDown) return;
+                    isPointerDown = false;
+                    try { e.target.releasePointerCapture(activePointerId); } catch (err) {}
+                    carouselContainer.style.cursor = 'grab';
+                    // compute on pointer end
+                    this.handleSwipe(startX, currentX);
+                };
+
+                carouselContainer.addEventListener('pointerup', endPointer);
+                carouselContainer.addEventListener('pointercancel', endPointer);
+                carouselContainer.addEventListener('pointerleave', endPointer);
+
+                // Keyboard navigation
+                document.addEventListener('keydown', (e) => {
+                    if (e.key === 'ArrowLeft') this.prevSlide();
+                    if (e.key === 'ArrowRight') this.nextSlide();
+                });
+            }
+
+            handleSwipe(startX, currentX) {
+                const diff = startX - currentX;
+                const threshold = this.swipeThreshold || 25; // Minimum swipe distance
+
+                if (Math.abs(diff) > threshold) {
+                    if (diff > 0) {
+                        this.nextSlide(); // Swipe left = next slide
+                    } else {
+                        this.prevSlide(); // Swipe right = previous slide
+                    }
+                }
+            }
+
+            nextSlide() {
+                this.currentIndex = (this.currentIndex + 1) % this.images.length;
+                this.updateCarousel();
+            }
+
+            prevSlide() {
+                this.currentIndex = (this.currentIndex - 1 + this.images.length) % this.images.length;
+                this.updateCarousel();
+            }
+
+            goToSlide(index) {
+                this.currentIndex = index;
+                this.updateCarousel();
+            }
+
+            updateCarousel() {
+                // Update active slide
+                const items = document.querySelectorAll('.carousel-item');
+                items.forEach((item, index) => {
+                    item.classList.toggle('active', index === this.currentIndex);
+                });
+
+                // Update active dot
+                const dots = document.querySelectorAll('.dot');
+                dots.forEach((dot, index) => {
+                    dot.classList.toggle('active', index === this.currentIndex);
+                });
+                // Reposition indicators in case active image size changed
+                this.positionIndicators();
+            }
+
+            // Position the pagination dots relative to the visible image
+            positionIndicators() {
+                const container = document.querySelector('.carousel-container');
+                const indicators = document.getElementById('indicators');
+                if (!container || !indicators) return;
+
+                // Find the currently active image (visible one)
+                const activeItem = container.querySelector('.carousel-item.active');
+                if (!activeItem) return;
+                const img = activeItem.querySelector('img');
+                if (!img) return;
+
+                // Get bounding rects
+                const containerRect = container.getBoundingClientRect();
+                const imgRect = img.getBoundingClientRect();
+
+                // Distance from image bottom to container bottom
+                const distance = Math.max(0, Math.round(containerRect.bottom - imgRect.bottom));
+
+                // Place indicators 15px above image bottom: so bottom offset from container = distance + 15
+                const bottomOffset = distance + 15;
+                indicators.style.bottom = `${bottomOffset}px`;
+            }
+        }
+
+        // Image array - Replace with your actual image paths from assets folder
+        const carouselImages = [
+            'assetes/imgi_17_Banner-1-1920x900.png',
+            'assetes/imgi_13_Banner-2-1920x900.png',
+            'assetes/imgi_15_Banner-3-1920x900.png'
+        ];
+
+        // Initialize carousel when DOM is loaded
+        document.addEventListener('DOMContentLoaded', () => {
+            new ImageCarousel(carouselImages);
+        });
+    </script>
+</body>
+</html>
